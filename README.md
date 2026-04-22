@@ -13,10 +13,11 @@ Coding agents — Claude Code, OpenCode, and others — execute shell commands t
 ```
 $ dow https://example.com/large-model-weights.tar.gz
 
- name                      │  status                          │  eta   │  path
- ──────────────────────────┼──────────────────────────────────┼────────┼─────────────────────────────────────────────────
- large-model-weights.tar.gz│  downloading...(0 B) 0 B/s       │  -     │  /home/user/Downloads/large-model-weights.tar.gz
- large-model-weights.tar.gz│  downloading...(15%) 1.8 MB/s  │  5m    │  /home/user/Downloads/large-model-weights.tar.gz
+id abc123
+name large-model-weights.tar.gz
+status downloading...(15%) 1.8 MB/s
+eta 5m
+path /home/user/Downloads/large-model-weights.tar.gz
 ```
 
 The agent can check progress at any time with `dow list`, wait for completion by polling `dow list --filter=downloading`, and move on once the status flips to `complete`.
