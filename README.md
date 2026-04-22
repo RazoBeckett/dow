@@ -13,9 +13,10 @@ Coding agents — Claude Code, OpenCode, and others — execute shell commands t
 ```
 $ dow https://example.com/large-model-weights.tar.gz
 
- name                      │  status                          │  path
- ──────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────
- large-model-weights.tar.gz│  downloading...(0 B) 0 B/s       │  /home/user/Downloads/large-model-weights.tar.gz
+ name                      │  status                          │  eta   │  path
+ ──────────────────────────┼──────────────────────────────────┼────────┼─────────────────────────────────────────────────
+ large-model-weights.tar.gz│  downloading...(0 B) 0 B/s       │  -     │  /home/user/Downloads/large-model-weights.tar.gz
+ large-model-weights.tar.gz│  downloading...(15%) 1.8 MB/s  │  5m    │  /home/user/Downloads/large-model-weights.tar.gz
 ```
 
 The agent can check progress at any time with `dow list`, wait for completion by polling `dow list --filter=downloading`, and move on once the status flips to `complete`.
@@ -197,15 +198,16 @@ All download records are persisted to `~/.local/share/dow/state.json`. The schem
 
 | Field        | Description                              |
 |--------------|------------------------------------------|
-| `id`         | Nanosecond timestamp used as a unique ID |
+| `id`         | 6-character hex ID                       |
 | `url`        | Original URL                             |
 | `filename`   | Filename on disk                         |
 | `path`       | Full path to the downloaded file         |
-| `status`     | `downloading` · `complete` · `cancelled` · `failed` |
+| `status`     | `downloading` · `complete` · `cancelled` · `failed` · `paused` |
 | `progress`   | 0–100 (percentage, when size is known)   |
 | `speed`      | Current transfer speed in bytes/sec      |
 | `size`       | Total file size in bytes (`-1` if unknown) |
 | `downloaded` | Bytes received so far                    |
+| `eta`        | Unix timestamp for estimated completion (`0` if unknown) |
 | `created_at` | When the download was registered         |
 | `updated_at` | Last state update                        |
 
