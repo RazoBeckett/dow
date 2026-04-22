@@ -22,17 +22,18 @@ const (
 
 // Download holds the metadata and live state of a single download.
 type Download struct {
-	ID         string  `json:"id"`
-	URL        string  `json:"url"`
-	Filename   string  `json:"filename"`
-	Path       string  `json:"path"`
-	Status     Status  `json:"status"`
-	Progress   float64 `json:"progress"`             // 0–100
-	Speed      float64 `json:"speed"`                // bytes/sec (live, while downloading)
-	Size       int64   `json:"size"`                 // total bytes; -1 if unknown
-	Downloaded int64   `json:"downloaded"`           // bytes received so far
-	CancelRequested bool `json:"cancel_requested,omitempty"`
-	PauseRequested  bool `json:"pause_requested,omitempty"`
+	ID         string    `json:"id"`
+	URL        string    `json:"url"`
+	Filename   string    `json:"filename"`
+	Path       string    `json:"path"`
+	Status     Status    `json:"status"`
+	Progress   float64   `json:"progress"`             // 0–100
+	Speed      float64   `json:"speed"`                // bytes/sec (live, while downloading)
+	Size       int64     `json:"size"`                 // total bytes; -1 if unknown
+	Downloaded int64     `json:"downloaded"`           // bytes received so far
+	ETA        int64     `json:"eta"`                 // Unix timestamp (seconds), estimated completion; 0 if unknown
+	CancelRequested bool    `json:"cancel_requested,omitempty"`
+	PauseRequested  bool    `json:"pause_requested,omitempty"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

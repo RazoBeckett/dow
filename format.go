@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"charm.land/lipgloss/v2"
 )
@@ -33,6 +34,34 @@ func formatSpeed(bps float64) string {
 	default:
 		return fmt.Sprintf("%.0f B/s", bps)
 	}
+}
+
+// formatETA renders a Unix timestamp as a relative duration.
+func formatETA(ts int64) string {
+	if ts <= 0 {
+		return ""
+	}
+	now := time.Now().Unix()
+	remaining := ts - now
+	if remaining <= 0 {
+		return "< 1m"
+	}
+	if remaining < 60 {
+		return "< 1m"
+	}
+	if remaining < 3600 {
+		return fmt.Sprintf("%dm", remaining/60)
+	}
+	if remaining < 86400 {
+		h := remaining / 3600
+		m := (remaining % 3600) / 60
+		if m > 0 {
+			return fmt.Sprintf("%dh%dm", h, m)
+		}
+		return fmt.Sprintf("%dh", h)
+	}
+	d := remaining / 86400
+	return fmt.Sprintf("%dd", d)
 }
 
 // formatBytes renders a raw byte count in the most appropriate unit.
@@ -159,6 +188,7 @@ func printListPlain(downloads []Download, out func(string, ...any)) {
 		out("id %s", d.ID)
 		out("name %s", d.Filename)
 		out("status %s", statusCellPlain(d))
+		out("eta %s", formatETA(d.ETA))
 		out("path %s", d.Path)
 		if i < len(downloads)-1 {
 			out("") // blank line between entries
@@ -175,11 +205,12 @@ func printTable(downloads []Download, out func(string, ...any)) {
 		name      string
 		statusRaw string // plain, for width measurement
 		statusFmt string // coloured, for display
+		eta       string
 		path      string
 	}
 
 	rows := make([]row, len(downloads))
-	idW, nameW, statusW, pathW := len("id"), len("name"), len("status"), len("path")
+	idW, nameW, statusW, etaW, pathW := len("id"), len("name"), len("status"), len("eta"), len("path")
 
 	for i, d := range downloads {
 		r := row{
@@ -187,6 +218,7 @@ func printTable(downloads []Download, out func(string, ...any)) {
 			name:      d.Filename,
 			statusRaw: statusCellPlain(d),
 			statusFmt: statusCell(d),
+			eta:      formatETA(d.ETA),
 			path:      d.Path,
 		}
 		if len(r.id) > idW {
@@ -198,6 +230,9 @@ func printTable(downloads []Download, out func(string, ...any)) {
 		if len(r.statusRaw) > statusW {
 			statusW = len(r.statusRaw)
 		}
+		if len(r.eta) > etaW {
+			etaW = len(r.eta)
+		}
 		if len(r.path) > pathW {
 			pathW = len(r.path)
 		}
@@ -207,24 +242,31 @@ func printTable(downloads []Download, out func(string, ...any)) {
 	idSep     := strings.Repeat("─", idW)
 	nameSep   := strings.Repeat("─", nameW)
 	statusSep := strings.Repeat("─", statusW)
+	etaSep    := strings.Repeat("─", etaW)
 	pathSep   := strings.Repeat("─", pathW)
 
 	// Header
-	out(" %s  │  %s  │  %s  │  %s",
+	out(" %s  │  %s  │  %s  │  %s  │  %s",
 		colBold.Render(padRight("id", idW)),
 		colBold.Render(padRight("name", nameW)),
 		colBold.Render(padRight("status", statusW)),
+		colBold.Render(padRight("eta", etaW)),
 		colBold.Render("path"),
 	)
-	out(" %s──┼──%s──┼──%s──┼──%s", idSep, nameSep, statusSep, pathSep)
+	out(" %s──┼──%s──┼──%s──┼──%s──┼──%s", idSep, nameSep, statusSep, etaSep, pathSep)
 
 	// Rows – status column needs extra padding because ANSI codes inflate len().
 	for _, r := range rows {
 		paddedStatus := r.statusFmt + strings.Repeat(" ", max(0, statusW-len(r.statusRaw)))
-		out(" %-*s  │  %-*s  │  %s  │  %s",
+		etaVal := r.eta
+		if etaVal == "" {
+			etaVal = "-"
+		}
+		out(" %-*s  │  %-*s  │  %s  │  %-*s  │  %s",
 			idW, colDim.Render(r.id),
 			nameW, r.name,
 			paddedStatus,
+			etaW, etaVal,
 			r.path,
 		)
 	}

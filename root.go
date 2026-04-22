@@ -187,6 +187,7 @@ func runWorker(ctx context.Context, id string) error {
 			if finalStatus == StatusComplete {
 				d.Progress = 100
 				d.Speed = 0
+				d.ETA = 0
 			}
 		})
 		return nil
@@ -301,6 +302,11 @@ func doDownloadQuiet(ctx context.Context, id, rawURL, filename, outputPath strin
 						if !shouldCancel && !shouldPause {
 							d.Progress = pct
 							d.Speed = speed
+							// ETA: remaining bytes / current speed
+							if speed > 0 && totalSize > 0 {
+								remaining := float64(totalSize - downloaded)
+								d.ETA = time.Now().Unix() + int64(remaining/speed)
+							}
 						}
 					})
 					return nil
@@ -405,6 +411,7 @@ func runDownloadForeground(ctx context.Context, rawURL, customPath string) error
 			if finalStatus == StatusComplete {
 				d.Progress = 100
 				d.Speed = 0
+				d.ETA = 0
 			}
 		})
 		return nil
@@ -485,6 +492,10 @@ func doDownload(ctx context.Context, id, rawURL, filename, outputPath string) er
 						d.Progress = pct
 						d.Speed = speed
 						d.Downloaded = downloaded
+						if speed > 0 && totalSize > 0 {
+							remaining := float64(totalSize - downloaded)
+							d.ETA = time.Now().Unix() + int64(remaining/speed)
+						}
 					})
 					return nil
 				})
