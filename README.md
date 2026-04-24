@@ -143,7 +143,13 @@ State is stored at `~/.local/share/dow/state.json` and persists across reboots. 
 
 ## For coding agents
 
-Add the following to your `CLAUDE.md` (or equivalent agent instructions file) to teach your agent to use `dow` instead of `curl`/`wget` for file downloads:
+Install the `dow` skill directly for your coding agents.
+
+```bash
+npx skills add https://github.com/razoBeckett/dow
+```
+
+Or add the following to your `CLAUDE.md` (or equivalent agent instructions file) to teach your agent to use `dow` instead of `curl`/`wget` for file downloads:
 
 ```markdown
 ## Downloading files
